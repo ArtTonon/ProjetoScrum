@@ -1,8 +1,10 @@
 package br.edu.ifsp.scrum;
 
+import java.util.List;
 import java.util.Scanner;
 
 public class Main {
+    private static final UsuarioDAO usuarioDAO = new UsuarioDAO();
     private static final Scanner sc = new Scanner(System.in);
     private static final Projeto projeto =
             new Projeto(1, "Sistema de Gerenciamento Scrum",
@@ -13,9 +15,10 @@ public class Main {
     private static int proximoBacklog = 1;
     private static int proximaTarefa = 1;
     private static int proximaSprint = 1;
+    private static final Scanner scanner = new Scanner(System.in);
 
     public static void main(String[] args) {
-        carregarExemplo();
+        Conexao.criarTabelaUsuarios();
 
         int opcao;
         do {
@@ -33,11 +36,42 @@ public class Main {
                 case 8 -> alterarStatusTarefa();
                 case 9 -> listarTarefas();
                 case 10 -> projeto.mostrarResumo();
+                case 11 -> listarTarefasDaSprint();
                 case 0 -> System.out.println("Programa encerrado.");
                 default -> System.out.println("Opção inválida.");
             }
         } while (opcao != 0);
     }
+
+    private static void listarTarefasDaSprint() {
+
+    if (projeto.getSprints().isEmpty()) {
+        System.out.println("Nenhuma Sprint cadastrada.");
+        return;
+    }
+
+    System.out.println("\n--- SPRINTS ---");
+
+    for (Sprint sprint : projeto.getSprints()) {
+        System.out.println(
+            sprint.getId() + " - " + sprint.getNome()
+        );
+    }
+
+    System.out.print("Digite o ID da Sprint: ");
+    int id = scanner.nextInt();
+    scanner.nextLine();
+
+    for (Sprint sprint : projeto.getSprints()) {
+
+        if (sprint.getId() == id) {
+            sprint.mostrarTarefas();
+            return;
+        }
+    }
+
+    System.out.println("Sprint não encontrada.");
+}
 
     private static void exibirMenu() {
         System.out.println("\n======================================");
@@ -56,32 +90,6 @@ public class Main {
         System.out.println("0 - Sair");
     }
 
-    private static void carregarExemplo() {
-        Usuario po = new Usuario(proximoUsuario++, "Ana", "ana@email.com", "123", "Product Owner");
-        Usuario sm = new Usuario(proximoUsuario++, "Carlos", "carlos@email.com", "123", "Scrum Master");
-        Usuario dev = new Usuario(proximoUsuario++, "João", "joao@email.com", "123", "Desenvolvedor");
-
-        projeto.adicionarMembro(po);
-        projeto.adicionarMembro(sm);
-        projeto.adicionarMembro(dev);
-
-        ProductBacklog b1 = new ProductBacklog(proximoBacklog++, "Cadastro de usuários",
-                "Permitir cadastrar usuários no sistema.", 1);
-        ProductBacklog b2 = new ProductBacklog(proximoBacklog++, "Cadastro de projetos",
-                "Permitir criar e visualizar projetos.", 2);
-        ProductBacklog b3 = new ProductBacklog(proximoBacklog++, "Gerenciar tarefas",
-                "Criar e alterar tarefas das sprints.", 3);
-
-        b1.adicionarTarefa(new Tarefa(proximaTarefa++, "Criar tela de cadastro",
-                "Implementar o cadastro básico.", 4));
-        b2.adicionarTarefa(new Tarefa(proximaTarefa++, "Criar classe Projeto",
-                "Implementar a entidade Projeto.", 3));
-
-        projeto.adicionarItemBacklog(b1);
-        projeto.adicionarItemBacklog(b2);
-        projeto.adicionarItemBacklog(b3);
-    }
-
     private static void cadastrarUsuario() {
         System.out.println("\n--- Novo usuário ---");
         String nome = lerTexto("Nome: ");
@@ -92,16 +100,33 @@ public class Main {
         Usuario usuario = new Usuario(proximoUsuario++, nome, email, senha, cargo);
         projeto.adicionarMembro(usuario);
         System.out.println("Usuário cadastrado!");
+
+        boolean salvo = usuarioDAO.salvar(usuario);
+
+        if (salvo) {
+            System.out.println("Usuário cadastrado e salvo no banco!");
+        } else {
+            System.out.println(
+                "Cadastro não realizado. Verifique se o e-mail já existe."
+            );
+        }
     }
 
     private static void listarMembros() {
-        System.out.println("\n--- Membros do projeto ---");
-        if (projeto.getMembros().isEmpty()) {
-            System.out.println("Nenhum membro.");
-            return;
-        }
-        projeto.getMembros().forEach(System.out::println);
+
+    System.out.println("\n--- Membros do projeto ---");
+
+    List<Usuario> usuarios = usuarioDAO.listar();
+
+    if (usuarios.isEmpty()) {
+        System.out.println("Nenhum usuário cadastrado.");
+        return;
     }
+
+    for (Usuario usuario : usuarios) {
+        System.out.println(usuario);
+    }
+}
 
     private static void cadastrarBacklog() {
         System.out.println("\n--- Novo item do Product Backlog ---");

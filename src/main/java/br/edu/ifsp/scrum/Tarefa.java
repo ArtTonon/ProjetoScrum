@@ -10,12 +10,18 @@ public class Tarefa {
     private Usuario responsavel;
 
     public Tarefa(int id, String titulo, String descricao, double estimativaHoras) {
-        this.id = id;
-        this.titulo = titulo;
-        this.descricao = descricao;
+    this.id = id;
+    this.titulo = titulo;
+    this.descricao = descricao;
+
+    if (estimativaHoras > 0) {
         this.estimativaHoras = estimativaHoras;
-        this.status = "A FAZER";
+    } else {
+        this.estimativaHoras = 1;
     }
+
+    this.status = "A FAZER";
+}
 
     public int getId() {
         return id;
@@ -65,20 +71,20 @@ public class Tarefa {
     }
 
     @Override
-    public String toString() {
+public String toString() {
 
-        String nomeResponsavel;
+    String nomeResponsavel;
 
-        if (responsavel == null) {
-            nomeResponsavel = "Não definido";
-        } else {
-            nomeResponsavel = responsavel.getNome();
-        }
-
-        return "Tarefa #" + id
-                + " | " + titulo
-                + " | Status: " + status
-                + " | Estimativa: " + estimativaHoras + "h"
-                + " | Responsável: " + nomeResponsavel;
+    if (responsavel == null) {
+        nomeResponsavel = "Não definido";
+    } else {
+        nomeResponsavel = responsavel.getNome();
     }
+
+    return "Tarefa #" + id
+            + " | " + titulo
+            + " | Status: " + status
+            + " | Estimativa: " + estimativaHoras + "h"
+            + " | Responsável: " + nomeResponsavel;
+}
 }

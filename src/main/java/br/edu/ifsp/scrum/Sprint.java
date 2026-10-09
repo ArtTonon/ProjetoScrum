@@ -29,6 +29,23 @@ public class Sprint {
         status = "Em andamento";
     }
 
+    public int getId() {
+        return id;
+    }
+
+    public void mostrarTarefas() {
+    if (tarefas.isEmpty()) {
+        System.out.println("Nenhuma tarefa cadastrada nesta Sprint.");
+        return;
+    }
+
+    System.out.println("\n--- TAREFAS DA SPRINT ---");
+
+    for (Tarefa tarefa : tarefas) {
+        System.out.println(tarefa);
+    }
+}
+
     public void finalizarSprint() {
         status = "Finalizada";
     }
