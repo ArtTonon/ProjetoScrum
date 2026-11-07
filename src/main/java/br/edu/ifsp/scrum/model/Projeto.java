@@ -1,4 +1,4 @@
-package br.edu.ifsp.scrum;
+package br.edu.ifsp.scrum.model;
 
 import java.util.ArrayList;
 import java.util.Comparator;

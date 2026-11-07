@@ -1,47 +1,54 @@
-# Projeto Scrum em Java
+# Projeto Scrum Java (refatorado)
 
-Projeto acadêmico simples, baseado no relatório científico **"Implementação da Metodologia Scrum no Gerenciamento de Projetos de Desenvolvimento de Software"**.
+Sistema de gerenciamento Scrum em Java 17, Maven e SQLite. Menu com 12 opcoes.
 
-## O que foi implementado
+## Executar
 
-- Projeto
-- Usuários e papéis:
-  - Product Owner
-  - Scrum Master
-  - Desenvolvedor
-- Product Backlog
-- Sprint
-- Tarefas
-- Prioridade do backlog
-- Planejamento de Sprint
-- Alteração de status das tarefas
-- Resumo do projeto
+No terminal, dentro da pasta que contem `pom.xml`:
 
-## Tecnologias
-
-- Java 17
-- Maven
-- Aplicação de console
-- Sem banco de dados e sem bibliotecas externas
-
-## Como executar
-
-### Pelo terminal
-
-Na pasta do projeto:
-
-```bash
+```powershell
 mvn clean compile
 mvn exec:java
 ```
 
-### No NetBeans
+O SQLite cria o arquivo `scrum.db` no diretorio de execucao. **Antes de substituir o projeto, copie o `scrum.db` original para um local seguro.** Depois, coloque uma copia no diretorio do novo projeto, ao lado do `pom.xml`.
 
-1. Abra o NetBeans.
-2. Vá em **File > Open Project**.
-3. Selecione a pasta `ProjetoScrumJava`.
-4. Execute o projeto.
+## Organizacao
 
-## Observação
+- `model/`: classes do dominio preservadas para a futura interface grafica.
+- `dao/`: consultas SQL e persistencia.
+- `service/`: operacoes transacionais do planejamento.
+- `security/`: hash de senhas PBKDF2-HMAC-SHA256.
+- `Main.java`: menu de terminal e leitura de dados.
 
-O relatório apresenta um modelo conceitual com as classes Projeto, Sprint, Usuario, ProductBacklog e Tarefa. Este projeto transforma esse modelo em uma versão simples e funcional de console. Os dados ficam apenas em memória enquanto o programa está aberto.
+## Compatibilidade
+
+A estrutura das tabelas e os dados anteriores sao preservados. Ao iniciar, senhas antigas em texto simples sao migradas para hashes; a exclusao continua exigindo a senha original. **Faca backup antes da primeira execucao**, pois a migracao altera os valores da coluna `senha`.
+
+Se o banco antigo tiver dois e-mails que so diferem em maiusculas/minusculas, a criacao do indice unico falhara; corrija os cadastros manualmente apos backup. Nenhum registro e excluido automaticamente.
+
+## Observacoes
+
+- O planejamento associa uma tarefa a uma Sprint e a um item do backlog; pode associar varias tarefas ao mesmo item.
+- A mudanca de status da tarefa e persistida. O status do item do backlog nao e automaticamente concluido quando uma tarefa termina.
+- Nao inclui ainda login, permissoes, interface JavaFX nem testes automatizados de integracao.
+- `scrum.db` e `.git/` nao fazem parte deste pacote por privacidade e seguranca.
+
+
+## Login e permissoes
+
+No primeiro acesso com banco vazio, o sistema pede o cadastro inicial do Product Owner.
+Depois, todos os acessos exigem e-mail e senha. Tres tentativas por sessao.
+
+- Product Owner: cadastra/exclui usuarios, gerencia backlog, cria/planeja Sprints, atualiza tarefas.
+- Scrum Master: cria/planeja Sprints e atualiza tarefas.
+- Desenvolvedor: consulta os dados e atualiza status de tarefas.
+- Todos: visualizam membros, backlog, Sprints, tarefas e resumo.
+- Opcao 13: trocar usuario. Opcao 0: encerrar.
+
+A exclusao de usuario continua exigindo a senha da conta excluida.
+Por seguranca, o usuario logado nao pode excluir sua propria conta nesta versao.
+
+**Atenção:** nao use senhas reais de outros servicos. O sistema e didatico, sem
+recuperacao de senha, bloqueio persistente ou auditoria. Os cargos antigos
+sao preservados conforme registrados no SQLite.
